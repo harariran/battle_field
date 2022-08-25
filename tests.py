@@ -41,6 +41,6 @@ def test_sim_teams(env):
     agents = env.get_env_agents()
     red_agents  = [agent for agent in agents if "red" in agent]
     blue_agents = [agent for agent in agents if "blue" in agent]
-    team1 = factory.CreateDecentralizedAgentsTeam(env,"blues",Simple_DM,blue_agents, coordinator=coordinator.SimGreedyCoordinator(env))
+    team1 = factory.CreateDecentralizedAgentsTeam(env,"blues",Simple_DM,blue_agents, coordinator=coordinator.IdentityCoordinator(env))
     team2 = factory.CreateDecentralizedAgentsTeam(env,"reds",Stay_DM,red_agents)
     factory.CreateTeamsController(env,[team1,team2])

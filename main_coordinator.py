@@ -8,7 +8,7 @@ filterwarnings(action='ignore', category=DeprecationWarning, message='`np.bool` 
 
 # mac_BF_env = factory.CreateEnvironment()
 
-mac_BF_env = CreateEnvironment_Battle(minimap=True)
+mac_BF_env = CreateEnvironment_Battle(minimap=False)
 
 
 # tests.test_centralized_controller(mac_BF_env)

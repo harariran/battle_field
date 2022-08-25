@@ -35,11 +35,11 @@ class Team:
                 """
 
         team_observations = {agent_id: observation[agent_id]
-                            for agent_id in self.agents_names if agent_id in observation.keys()}
+                            for agent_id in self.agents_names if agent_id in observation.keys() and agent_id}
 
         joint_action = {}
         joint_plan = {}
-        for agent_name in self.agents_names:
+        for agent_name in team_observations.keys():
             if self.coordinator is not None:  # If there's a coordinator, the decision maker returns a plan
                 try:
                     plan = self.agents[agent_name].get_decision_maker().get_plan(team_observations[agent_name],
