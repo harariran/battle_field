@@ -3,10 +3,11 @@ from abc import ABC, abstractmethod
 
 class Agent:
 
-    def __init__(self, decision_maker, sensor_function=None, message_filter=None):
+    def __init__(self, decision_maker, sensor_function=None, message_filter=None, agent_name=None):
         self.decision_maker = decision_maker
         self.sensor_function = sensor_function or (lambda x: x)  # default to identity function
         self.message_filter = message_filter
+        self.agent_name = agent_name
 
     def get_decision_maker(self):
         return self.decision_maker

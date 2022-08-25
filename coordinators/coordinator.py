@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
-import factory
-import performance
-import battle_field_ulits as utils
+from utils import battle_field_ulits as utils, performance, factory
 
 
 # The abstract coordinator class with the abstract method approve_joint_plan
@@ -60,6 +58,8 @@ class SimGreedyCoordinator(coordinator):
         checked_plans = opponent_plans  # Opponent plans are always the same
 
         for (agent, plan) in coordination_plans.items():  # Consider adding each plan
+            if isinstance(plan,int):   # corrects single action to a list (plan of 1 action)
+                plan = [plan]
             checked_plans[agent] = plan
 
             # Simulate adding the current plan

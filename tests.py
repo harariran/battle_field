@@ -1,8 +1,8 @@
 from DMs.simple_DMs import *
-import factory
-import coordinator
-import performance
-import constants as const
+from DMs.simple_planner import Simple_DM
+from agents.team import Team
+from coordinators import coordinator
+from utils import constants as const, performance, factory
 
 
 # Test a centralized controller with a random decision maker
@@ -35,4 +35,12 @@ def test_coordinator(env):
 # and it uses a greedy mechanism and a binary hard constraint between every pair of plans to decide which plan to take.
 # The unapproved plans become plans with a repeated default action (Do nothing)
 def test_sim_coordinator(env):
-    factory.CreateDecentralizedController(env, factory.CreateDecentralizedAgents(env, RandomDecisionMaker, RandomDecisionMaker), coordinator=coordinator.SimGreedyCoordinator(env), plan_length=const.PLAN_LENGTH)
+    factory.CreateDecentralizedController(env, factory.CreateDecentralizedAgents(env, Simple_DM , RandomDecisionMaker), coordinator=coordinator.SimGreedyCoordinator(env), plan_length=const.PLAN_LENGTH)
+
+def test_sim_teams(env):
+    agents = env.get_env_agents()
+    red_agents  = [agent for agent in agents if "red" in agent]
+    blue_agents = [agent for agent in agents if "blue" in agent]
+    team1 = factory.CreateDecentralizedAgentsTeam(env,"blues",Simple_DM,blue_agents, coordinator=coordinator.SimGreedyCoordinator(env))
+    team2 = factory.CreateDecentralizedAgentsTeam(env,"reds",Stay_DM,red_agents)
+    factory.CreateTeamsController(env,[team1,team2])

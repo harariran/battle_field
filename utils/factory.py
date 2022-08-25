@@ -1,10 +1,12 @@
 from pettingzoo.magent import battlefield_v5
 from agents import Agent
 from DMs.simple_DMs import *
-from control import CentralizedController, DecentralizedController
+from agents.team import Team
+from control import CentralizedController
+from control.teams_controller import TeamsController
 from control.cont_decentral_coordinator import DecentralizedControllerCoordinator
 from environments import EnvWrapperPZ
-import constants as const
+from utils import constants as const
 
 
 # A Wrapper for the pettingzoo environment within MAC
@@ -52,6 +54,14 @@ def CreateDecentralizedIdenticalAgents(env, decision_maker):
     }
     return decentralized_agents
 
+# Create identical agents with the same decision maker for agents names
+def CreateDecentralizedAgentsTeam(env, team_name, decision_maker,agent_names,coordinator=None):
+    decentralized_agents = {
+        agent_id: Agent(decision_maker(env.action_spaces[agent_id]))
+        for agent_id in agent_names
+    }
+    return Team(team_name,decentralized_agents,coordinator)
+
 
 # Create multiple agents divided into two groups of different decision makers
 def CreateDecentralizedAgents(env, blue_decision_maker, red_decision_maker):
@@ -85,6 +95,15 @@ def CreateDecentralizedController(env, agents, coordinator=None, plan_length=0):
 
     # Running the decentralized agents
     decentralized_controller.run(render=True, max_iteration=1000)
+
+
+# Create and run a teams controller using a given dictionary/list of teams
+def CreateTeamsController(env, teams):
+    # Creating a decentralized controller with the random agents
+    teams_controller = TeamsController(env, teams)
+
+    # Running the decentralized agents
+    teams_controller.run(render=True, max_iteration=1000)
 
 
 # Create a simulation of joint_plan

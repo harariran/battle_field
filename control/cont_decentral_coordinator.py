@@ -37,6 +37,8 @@ class DecentralizedControllerCoordinator(Controller):
                     plan = self.agents[agent_name].get_decision_maker().get_plan(observation[agent_name], self.plan_length)
                 except:
                     plan = self.agents[agent_name].get_decision_maker().get_action(observation[agent_name])
+                if isinstance(plan,int): #correct single action plan to a list
+                    plan = [plan]
                 joint_plan[agent_name] = plan
             else:
                 action = self.agents[agent_name].get_decision_maker().get_action(observation[agent_name])

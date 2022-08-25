@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from warnings import filterwarnings
 
-from pettingzoo.magent import battlefield_v5
+from pettingzoo.magent import battlefield_v5, battle_v4
 
 from agents import Agent
 from utils.functions import CreateDecentralizedAgents
@@ -136,6 +136,16 @@ class BattleFieldSingleEnv():
 def CreateEnvironment(minimap=False):
     # Create and reset PettingZoo environment
     BF_env = battlefield_v5.parallel_env(map_size=46, minimap_mode=minimap, step_reward=-0.005, dead_penalty=-0.1,
+                                         attack_penalty=-0.01, attack_opponent_reward=0.5, max_cycles=1000,
+                                         extra_features=False)
+    BF_env.reset()
+
+    # Create a MAC from the PZ environment
+    return BattleFieldEnv(BF_env)
+
+def CreateEnvironment_Battle(minimap=False):
+    # Create and reset PettingZoo environment
+    BF_env = battle_v4.parallel_env(map_size=45, minimap_mode=minimap, step_reward=-0.005, dead_penalty=-0.1,
                                          attack_penalty=-0.01, attack_opponent_reward=0.5, max_cycles=1000,
                                          extra_features=False)
     BF_env.reset()

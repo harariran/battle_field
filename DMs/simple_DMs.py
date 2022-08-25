@@ -38,7 +38,7 @@ class Do_action_DM:
             return 2
 
 class Stay_DM:
-    def __init__(self, action_space, action):
+    def __init__(self, action_space, action=6):
         self.action_space=action_space
         self.steps = 0
         self.action = action

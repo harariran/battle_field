@@ -17,7 +17,8 @@ import torch
 import numpy as np
 from stable_baselines3 import DQN, PPO
 
-from environments.env_wrapper import BattleFieldSingleEnv,CreateEnvironment
+from environments.env_wrapper import BattleFieldSingleEnv,CreateEnvironment, CreateEnvironment_Battle
+from DMs.simple_planner import Simple_DM
 from utils.functions import CreateDecentralizedAgents, CreateCentralizedController, \
     CreateDecentralizedController
 
@@ -38,7 +39,7 @@ from DMs.simple_DMs import Do_action_DM, DecisionMaker, Stay_DM
 class PPODecisionMaker(DecisionMaker):
     def __init__(self, action_space):
         self.space = action_space
-        self.model_file_name = 'BF_PPO1'
+        self.model_file_name = 'B_PPO2'
         try:
             self.model = PPO.load(self.model_file_name)
         except:
@@ -76,15 +77,17 @@ class PPODecisionMaker(DecisionMaker):
 
     def retrain(self,env):
         self.model.set_env(env)
-        self.model.learn(total_timesteps=200000, n_eval_episodes=200)
+        self.model.learn(total_timesteps=100000, n_eval_episodes=100)
         self.model.save(self.model_file_name)
 
 
 
     def train_model(self):
-        env = CreateEnvironment()
+        env = CreateEnvironment_Battle()
         agent = "blue_0"
-        temp_env = BattleFieldSingleEnv(env, Stay_DM, Stay_DM, agent)
+        action_space = env.action_spaces[agent]
+
+        temp_env = BattleFieldSingleEnv(env, Simple_DM(action_space,0.5), Simple_DM(action_space,0.5,red_team=True), agent)
 
         obs = temp_env.reset()
         # for i in range(20):
@@ -95,7 +98,7 @@ class PPODecisionMaker(DecisionMaker):
         temp_env.render()
 
         model = PPO("MlpPolicy", temp_env, verbose=1)
-        model.learn(total_timesteps=2000000,n_eval_episodes=200)
+        model.learn(total_timesteps=100000,n_eval_episodes=200)
         self.model = model
         self.model.save(self.model_file_name)
 
@@ -116,9 +119,13 @@ class PPODecisionMaker(DecisionMaker):
 
 if __name__ == '__main__':
     # check code:
-    env = CreateEnvironment()
+    env = CreateEnvironment_Battle()
     agent = "blue_0"
-    single_env = BattleFieldSingleEnv(env, Stay_DM(env.action_spaces[agent],6), Stay_DM(env.action_spaces[agent],0), agent)
+    action_space = env.action_spaces[agent]
+
+    # single_env = BattleFieldSingleEnv(env, Simple_DM(action_space), Simple_DM(action_space,0.5,red_team=True), agent)
+    single_env = BattleFieldSingleEnv(env, Simple_DM(action_space), Stay_DM(action_space), agent)
+
 
 
 

@@ -1,5 +1,5 @@
 import numpy as np
-import constants as const
+from utils import constants as const
 
 # Each tuple contains the action number, a readable name, x difference and y difference
 action_tuples = [(0, '2-Up', 0, -2), (1, 'Up-Left', -1, -1), (2, '1-Up', -1, 0), (3, 'Up-Right', -1, 1),
@@ -102,7 +102,10 @@ def all_agents_pos_seq(observations):
 
 # Position only by advancing initial observation using the plan
 def est_agent_pos_seq(initial_obs, agent_id, plan):
-    e_pos = [agent_pos(initial_obs, agent_id)]
+    try:
+        e_pos = [agent_pos(initial_obs, agent_id)]
+    except:
+        e_pos = [0,0]
     for i in range(1, len(plan)):
         pos = action_num_to_diff(plan[i])
         e_pos.append([sum(x) for x in zip(e_pos[i-1], pos)])
