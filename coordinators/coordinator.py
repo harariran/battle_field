@@ -31,6 +31,9 @@ class IdentityCoordinator(coordinator):
 class SimGreedyCoordinator(coordinator):
     def __init__(self, env):
         super().__init__(env)
+        self.SimEnv = deepcopy(
+            env)  # Create a copy of the environment to enable environment steps without changing the real environment
+
 
     # This is the greedy vs. greedy coordination
     def approve_joint_plan(self, joint_plan):

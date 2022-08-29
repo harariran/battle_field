@@ -21,5 +21,6 @@ mac_BF_env = CreateEnvironment_Battle(minimap=False)
 
 # tests.test_sim_coordinator(mac_BF_env)
 
-tests.test_sim_teams(mac_BF_env)
+# tests.test_sim_teams(mac_BF_env)
 
+tests.test_sim_teams2(mac_BF_env)

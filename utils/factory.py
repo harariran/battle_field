@@ -1,3 +1,5 @@
+import copy
+
 from pettingzoo.magent import battlefield_v5
 from agents import Agent
 from DMs.simple_DMs import *
@@ -56,10 +58,16 @@ def CreateDecentralizedIdenticalAgents(env, decision_maker):
 
 # Create identical agents with the same decision maker for agents names
 def CreateDecentralizedAgentsTeam(env, team_name, decision_maker,agent_names,coordinator=None):
-    decentralized_agents = {
-        agent_id: Agent(decision_maker(env.action_spaces[agent_id]))
-        for agent_id in agent_names
-    }
+    if isinstance(decision_maker,DecisionMaker):
+        decentralized_agents = {
+            agent_id: Agent(copy.deepcopy(decision_maker))
+            for agent_id in agent_names
+        }
+    else:
+        decentralized_agents = {
+            agent_id: Agent(decision_maker(env.action_spaces[agent_id]))
+            for agent_id in agent_names
+        }
     return Team(team_name,decentralized_agents,coordinator)
 
 
