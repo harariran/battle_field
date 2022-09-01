@@ -36,7 +36,7 @@ from DMs.simple_DMs import Do_action_DM, DecisionMaker, Stay_DM
 
 
 class PPO_HL_DecisionMaker(DecisionMaker):
-    def __init__(self, model_name="HL_PPO3", action_space=Discrete(3)):
+    def __init__(self, action_space=Discrete(3), model_name="HL_PPO3"):
         self.space = action_space
         self.model_file_name = model_name
         try:
