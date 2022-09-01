@@ -12,6 +12,7 @@ class Simple_DM(DecisionMaker):
         self.op_team = []
         self.is_red_team = red_team
         self.counter = 0
+        self.enemy_orientation = None # remembers the direction of an enemy
 
 
     def set_state(self, obs):
@@ -82,6 +83,7 @@ class Simple_DM(DecisionMaker):
 
     def find_closest(self):
         min = 13
+        close_pos = (0,0)
         for x,_ in self.op_team:
             dist = abs(x[0])+ abs(x[1])
             if dist<min :
@@ -145,6 +147,43 @@ class Simple_DM(DecisionMaker):
         else: y = 1
         return self.go_to((x,y))
 
+    def group(self):
+        if len(self.my_team)==0:
+            return self.defensive_move()
+        x = 0
+        y = 0
+        for i, _ in self.my_team:
+            if i[0]!=0:
+                x+= i[0]/abs(i[0])
+            if i[1]!=0:
+                y+= i[1]/abs(i[1])
+        if x!=0:
+            x = int(x/abs(x))
+        if y!=0:
+            y = int(y/abs(y))
+        go_direction = (x,y)
+        if x==0:
+            if y==0:
+                return 6
+            else:
+                dbl_go= (x,y*2)
+                if self.check_my_team(dbl_go):
+                  return self.go_to(go_direction)
+        else:
+            if y==0:
+                dbl_go = (x * 2, y)
+                if self.check_my_team(dbl_go):
+                    return self.go_to(go_direction)
+            else:
+                if self.check_my_team(go_direction):
+                    if self.check_my_team((0,y*2)):
+                        return self.go_to((x*2,0))
+                    else:
+                        return self.go_to((0,y*2))
+                else:
+                    return self.go_to(go_direction)
+        return 6 # not in use
+
 
     def get_action(self, observation):
         self.counter+=1
@@ -163,6 +202,32 @@ class Simple_DM(DecisionMaker):
             return self.attack(atk)
         else:
             return self.chase_closest()
+
+    def get_Low_level_action(self, observation, HL_action):
+        self.set_state(observation)
+        self.counter+=1
+        if self.counter==50:
+            self.counter=0
+            self.is_red_team = not self.is_red_team
+        if HL_action==0: # group
+            return self.group()
+        elif HL_action==1: # attack (search, chase, attack)
+            if len(self.op_team) == 0:
+                if (self.enemy_orientation==None) or self.last_orientation>self.counter-20:
+                    return self.search_opponent()
+                else:
+                    return self.enemy_orientation
+            atk = self.attack_range()
+            if atk != None:
+                return self.attack(atk)
+            else:
+                self.enemy_orientation = self.chase_closest()
+                self.last_orientation = self.counter
+                return self.enemy_orientation
+        elif HL_action == 2:  # defensive move
+            return self.defensive_move()
+        else: # if action not 'legal' do nothing
+            return 6
 
 
 

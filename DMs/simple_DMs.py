@@ -2,7 +2,7 @@ import copy
 
 from agents import DecisionMaker
 
-class RandomDecisionMaker:
+class RandomDecisionMaker(DecisionMaker):
     def __init__(self, action_space):
         self.space = action_space
 
@@ -37,7 +37,7 @@ class Do_action_DM:
         else:
             return 2
 
-class Stay_DM:
+class Stay_DM(DecisionMaker):
     def __init__(self, action_space, action=6):
         self.action_space=action_space
         self.steps = 0

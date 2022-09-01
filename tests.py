@@ -1,5 +1,7 @@
+from DMs.PPO_HL1 import PPO_Low_level_DecisionMaker
 from DMs.simple_DMs import *
 from DMs.simple_planner import Simple_DM
+from DMs.simple_planner2 import Simple_DM2
 from agents.team import Team
 from coordinators import coordinator
 from utils import constants as const, performance, factory
@@ -53,3 +55,31 @@ def test_sim_teams2(env):
     team2 = factory.CreateDecentralizedAgentsTeam(env,"reds",Simple_DM(env.action_spaces["blue_1"], red_team=True)
                                                   ,red_agents, coordinator=coordinator.IdentityCoordinator(env))
     factory.CreateTeamsController(env,[team1,team2])
+
+def test_sim_teams3(env):
+    agents = env.get_env_agents()
+    red_agents  = [agent for agent in agents if "red" in agent]
+    blue_agents = [agent for agent in agents if "blue" in agent]
+    team1 = factory.CreateDecentralizedAgentsTeam(env,"blues",PPO_Low_level_DecisionMaker(env.action_spaces["blue_1"]),blue_agents)
+    team2 = factory.CreateDecentralizedAgentsTeam(env,"reds",Simple_DM2(env.action_spaces["blue_1"],0.5,red_team=True)
+                                                  ,red_agents)
+    factory.CreateTeamsController(env,[team1,team2])
+
+def test_sim_teams4(env):
+    agents = env.get_env_agents()
+    red_agents  = [agent for agent in agents if "red" in agent]
+    blue_agents = [agent for agent in agents if "blue" in agent]
+    team1 = factory.CreateDecentralizedAgentsTeam(env,"blues",PPO_Low_level_DecisionMaker(env.action_spaces["blue_1"]),blue_agents)
+    team2 = factory.CreateDecentralizedAgentsTeam(env,"reds",PPO_Low_level_DecisionMaker(env.action_spaces["blue_1"],red_team=True, model_name="HL_PPO2")
+                                                  ,red_agents)
+    factory.CreateTeamsController(env,[team1,team2])
+
+def test_sim_teams5(env):
+    agents = env.get_env_agents()
+    red_agents  = [agent for agent in agents if "red" in agent]
+    blue_agents = [agent for agent in agents if "blue" in agent]
+    team1 = factory.CreateDecentralizedAgentsTeam(env,"blues",PPO_Low_level_DecisionMaker(env.action_spaces["blue_1"]),blue_agents)
+    team2 = factory.CreateDecentralizedAgentsTeam(env,"reds",Simple_DM(env.action_spaces["blue_1"], red_team=True)
+                                                  ,red_agents)
+    result = factory.CreateTeamsController(env,[team1,team2],max_iters=50,rounds=2)
+    print(result)

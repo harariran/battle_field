@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from warnings import filterwarnings
 
+from gym.spaces import Discrete
 from pettingzoo.magent import battlefield_v5, battle_v4
 
+from DMs.simple_planner import Simple_DM
 from agents import Agent
 from utils.functions import CreateDecentralizedAgents
 
@@ -81,8 +83,14 @@ class BattleFieldEnv(EnvWrapperPZ):
     def observation_to_dict(self, obs):
         return obs
 
+    def final_result(self):
+        return self.env.team_sizes
+
     def reset(self):
         return self.env.reset()
+
+
+
 
 class BattleFieldSingleEnv():
     def __init__(self, env,blue_other_dm, red_DM, agent="blue_0"):
@@ -145,8 +153,8 @@ def CreateEnvironment(minimap=False):
 
 def CreateEnvironment_Battle(minimap=False):
     # Create and reset PettingZoo environment
-    BF_env = battle_v4.parallel_env(map_size=45, minimap_mode=minimap, step_reward=-0.005, dead_penalty=-0.1,
-                                         attack_penalty=-0.01, attack_opponent_reward=0.5, max_cycles=1000,
+    BF_env = battle_v4.parallel_env(map_size=45, minimap_mode=minimap, step_reward=-0.005, dead_penalty=-7,
+                                         attack_penalty=-0.01, attack_opponent_reward=0.8, max_cycles=400,
                                          extra_features=False)
     BF_env.reset()
 
@@ -175,6 +183,59 @@ def CreateDecentralizedAgents(env, blue_decision_maker, red_decision_maker):
 
     merged_dict = {**decentralized_blue_agents, **decentralized_red_agents}
     return merged_dict
+
+class BattleFieldHighLevelEnv():
+    def __init__(self, env,blue_other_dm, red_DM, agent="blue_0"):
+        self.env = env
+        self.HL_actions={
+            # "stand" : 0,
+            "group" : 0,
+            "attack" : 1, # search, chase, attack
+            "defend" : 2
+        }
+        self.DM = Simple_DM(env.action_spaces[agent])
+        self.action_space = Discrete(len(self.HL_actions))
+        self.observation_space = env.observation_spaces[agent]
+        self.agent_name = agent
+        self.agents = CreateDecentralizedAgents(env, blue_other_dm, red_DM)
+        self.others_blue_DM = blue_other_dm
+        self.others_red_DM = red_DM
+        self.all_obs = self.env.reset()
+        self.obs = self.all_obs[agent]
+        self.metadata = None
+        # print(self.obs)
+
+
+    def step(self, HL_action):
+        joint_action = {}
+        for agent_name in self.all_obs.keys():
+            act = self.agents[agent_name].get_decision_maker().get_action(self.all_obs[agent_name])
+            joint_action[agent_name] = act
+        joint_action[self.agent_name] = self.DM.get_Low_level_action(self.all_obs[self.agent_name],HL_action)
+        self.all_obs, reward, done, self.metadata = self.env.step(joint_action)
+        try:
+            self.obs = self.all_obs[self.agent_name]
+        except:
+            return (None, None, True, self.metadata)
+        return (self.obs, reward[self.agent_name], done[self.agent_name], self.metadata)
+
+    def observation_to_dict(self, obs):
+        return obs
+
+    def render(self):
+        return self.env.render()
+
+    def reset(self):
+        self.all_obs = self.env.reset()
+        self.obs = self.all_obs[self.agent_name]
+        return self.obs
+
+    def print_env_info(self):
+        for i, agent in enumerate(self.env.agents, 1):
+            print(f'- agent {i}: {agent}')
+            print(f'\t- observation space: {self.env.observation_space(agent)}')
+            print(f'\t- action space: {self.env.action_space(agent)}')
+            print(f'\t- action space sample: {self.env.action_space(agent).sample()}')
 
 #
 # class EnvWrapperMultiTaxi(EnvWrapper):

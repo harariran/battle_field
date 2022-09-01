@@ -106,12 +106,28 @@ def CreateDecentralizedController(env, agents, coordinator=None, plan_length=0):
 
 
 # Create and run a teams controller using a given dictionary/list of teams
-def CreateTeamsController(env, teams):
-    # Creating a decentralized controller with the random agents
+def CreateTeamsController(env, teams, render=True,max_iters=1000, rounds=1):
     teams_controller = TeamsController(env, teams)
 
-    # Running the decentralized agents
-    teams_controller.run(render=True, max_iteration=1000)
+    average_score_and_rewards = [["red_team_avarage",0,0],["blue_team_average",0,0]]
+    results = []
+    for i in range(rounds):
+        # Running the decentralized agents
+        teams_controller.run(render=render, max_iteration=max_iters)
+
+        # save and return results of this round
+        total_rewards = teams_controller.total_rewards
+        red_total_rewards = sum(total_rewards[item] for item in total_rewards if "red" in item)
+        blue_total_rewards = sum(total_rewards[item] for item in total_rewards if "blue" in item)
+        last_lives = env.final_result()
+        result = [["red_team",last_lives[0],red_total_rewards],["blue_team",last_lives[1],blue_total_rewards]]
+        results.append(result)
+        for m in range(1,3):
+            average_score_and_rewards[0][m]+=(result[0][m]-average_score_and_rewards[0][m])/(i+1)
+            average_score_and_rewards[1][m]+=(result[1][m] - average_score_and_rewards[1][m]) / (i + 1)
+
+    # print(f"{result}")
+    return results, average_score_and_rewards
 
 
 # Create a simulation of joint_plan

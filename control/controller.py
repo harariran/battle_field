@@ -11,6 +11,7 @@ class Controller(ABC):
     def __init__(self, env):
         self.env = env
         self.agent_ids = self.env.get_env_agents()
+        self.total_rewards = {agentname: 0 for agentname in self.agent_ids}
 
     def run(self, render=False, max_iteration=None):
         """Runs the controller on the environment given in the init,
@@ -23,7 +24,7 @@ class Controller(ABC):
         done = False
         index = 0
         observation = self.env.get_env().reset()
-        self.total_rewards = []
+        # self.total_rewards = {agentname:0 for agentname in observation.keys()}
         while done is not True:
             index += 1
             if max_iteration is not None and index > max_iteration:
@@ -43,7 +44,10 @@ class Controller(ABC):
             observation, reward, done, info = self.perform_joint_action(joint_action)
 
             # save rewards
-            self.total_rewards.append(reward)
+
+            for key in reward.keys():
+                self.total_rewards[key]+= reward[key]
+            # self.total_rewards.append(reward)
 
             # check if all agents are done
             if all(done.values()):
@@ -54,6 +58,9 @@ class Controller(ABC):
 
     def perform_joint_action(self, joint_action):
         return self.env.get_env().step(joint_action)
+
+    def get_rewards_dict(self):
+        return self.total_rewards
 
     @abstractmethod
     def get_joint_action(self, observation):

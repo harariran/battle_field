@@ -1,0 +1,23 @@
+name: fstma-tut11
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - jupyterlab
+  - ca-certificates
+  - openssl
+  - pytorch
+  - tqdm
+  - ipywidgets
+  - git
+  - pip
+  - seaborn
+  - pip:
+    - pettingzoo
+    - magent
+    - git+https://github.com/sarah-keren/ai_dm
+    - git+https://github.com/sarah-keren/multi_taxi@0.0.0
+    - git+https://github.com/sarah-keren/MAC
+    - stable-baselines3
